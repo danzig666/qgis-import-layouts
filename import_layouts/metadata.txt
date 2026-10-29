@@ -1,0 +1,24 @@
+[general]
+name=Import Layouts from Project
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Import all or selected print layouts (and reports) from another .qgs/.qgz project into the current project.
+about=Pick a .qgs or .qgz project, choose one or more of its layouts and import them into the current project.
+    Layer references (map layer sets, legends, atlas coverage layers, attribute tables, expressions) are
+    remapped to the layers of the current project: by layer ID when it matches, otherwise by layer name,
+    and finally by data source. The proposed mapping can be reviewed and overridden before importing.
+    The source project is only parsed, its layers are never loaded.
+    Available from the Plugins menu and from the Layout menu of the layout designer.
+version=1.0.0
+author=danzig666
+email=5346511+danzig666@users.noreply.github.com
+category=Plugins
+tags=layout,print layout,composer,report,import,copy,project,template
+icon=icon.png
+experimental=False
+deprecated=False
+homepage=https://github.com/danzig666/qgis-import-layouts
+tracker=https://github.com/danzig666/qgis-import-layouts/issues
+repository=https://github.com/danzig666/qgis-import-layouts
+changelog=1.0.0 - First release: import layouts and reports from .qgs/.qgz projects with layer remapping by ID, name or data source. Available from the Plugins menu and from the Layout menu of the layout designer.
