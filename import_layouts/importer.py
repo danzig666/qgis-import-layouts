@@ -54,6 +54,7 @@ class ImportResult:
         self.imported_name = imported_name
         self.status = status  # imported / replaced / skipped / failed
         self.warnings = []
+        self.unmapped = []  # names of referenced source layers left without a destination
 
 
 def _set_content(doc, data):
@@ -211,10 +212,8 @@ def _unique_name(manager, name):
     return "{} ({})".format(name, n)
 
 
-def _check_layout(layout, dest_project, unmapped_names):
+def _check_layout(layout, dest_project):
     warnings = []
-    if unmapped_names:
-        warnings.append("unmapped layers: " + ", ".join(sorted(unmapped_names)))
     if not isinstance(layout, QgsPrintLayout):
         return warnings
 
@@ -288,10 +287,10 @@ def import_layouts(source_project, layouts, mapping, dest_project, conflict=CONF
             continue
         result.imported_name = name
 
-        unmapped = {
+        result.unmapped = sorted({
             source_project.layers[i].name
             for i in src.layer_ids
             if not mapping.get(i) and i in source_project.layers
-        }
-        result.warnings.extend(_check_layout(layout, dest_project, unmapped))
+        }, key=str.lower)
+        result.warnings.extend(_check_layout(layout, dest_project))
     return results

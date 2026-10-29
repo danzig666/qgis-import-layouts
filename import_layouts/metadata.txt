@@ -10,7 +10,7 @@ about=Pick a .qgs or .qgz project, choose one or more of its layouts and import 
     and finally by data source. The proposed mapping can be reviewed and overridden before importing.
     The source project is only parsed, its layers are never loaded.
     Available from the Plugins menu and from the Layout menu of the layout designer.
-version=1.0.0
+version=1.0.1
 author=danzig666
 email=5346511+danzig666@users.noreply.github.com
 category=Plugins
@@ -21,4 +21,5 @@ deprecated=False
 homepage=https://github.com/danzig666/qgis-import-layouts
 tracker=https://github.com/danzig666/qgis-import-layouts/issues
 repository=https://github.com/danzig666/qgis-import-layouts
-changelog=1.0.0 - First release: import layouts and reports from .qgs/.qgz projects with layer remapping by ID, name or data source. Available from the Plugins menu and from the Layout menu of the layout designer.
+changelog=1.0.1 - Import report is a fixed-size, scrollable window; unmapped layers are listed once instead of per layout.
+    1.0.0 - First release: import layouts and reports from .qgs/.qgz projects with layer remapping by ID, name or data source. Available from the Plugins menu and from the Layout menu of the layout designer.

@@ -3,6 +3,7 @@ import os
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -13,6 +14,7 @@ from qgis.PyQt.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QSplitter,
     QTableWidget,
@@ -295,20 +297,59 @@ class ImportLayoutsDialog(QDialog):
                 line = "• {} → {}".format(r.source_name, r.imported_name)
             else:
                 line = "• {}{}".format(r.source_name, " (replaced)" if r.status == "replaced" else "")
+            if r.unmapped:
+                line += "  — {} unmapped layer(s)".format(len(r.unmapped))
             lines.append(line)
             lines.extend("    ⚠ " + w for w in r.warnings)
+
+        unmapped = sorted({n for r in results for n in r.unmapped}, key=str.lower)
+        if unmapped:
+            lines.append("")
+            lines.append("Unmapped layers ({}) — not found in the current project:".format(len(unmapped)))
+            lines.extend("    – " + n for n in unmapped)
         for line in lines:
             QgsMessageLog.logMessage(line, LOG_TAG, Qgis.MessageLevel.Info)
 
-        has_problems = any(r.warnings or r.status == "failed" for r in results)
+        has_problems = unmapped or any(r.warnings or r.status == "failed" for r in results)
         msg = "Imported {} of {} layout(s) from {}.".format(
             len(done), len(results), os.path.basename(self.source.path))
         bar = self.iface.messageBar()
         if has_problems:
             bar.pushWarning(LOG_TAG, msg + " Some layouts need attention.")
-            QMessageBox.warning(self, self.windowTitle(), msg + "\n\n" + "\n".join(lines))
+            ReportDialog(msg, "\n".join(lines), self).exec()
         else:
             bar.pushSuccess(LOG_TAG, msg)
         if done:
             project.setDirty(True)
             self.accept()
+
+
+class ReportDialog(QDialog):
+    """Import summary with the details in a scrollable box, so it never outgrows the screen."""
+
+    def __init__(self, summary, details, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Import Layouts from Project")
+        self.resize(640, 420)
+        layout = QVBoxLayout(self)
+
+        row = QHBoxLayout()
+        icon = QLabel()
+        icon.setPixmap(QgsApplication.getThemeIcon("/mIconWarning.svg").pixmap(32, 32))
+        row.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
+        label = QLabel(summary + "\nSome layouts need attention; details below "
+                       "(also in the 'Import Layouts' tab of the log panel).")
+        label.setWordWrap(True)
+        row.addWidget(label, 1)
+        layout.addLayout(row)
+
+        self.details = QPlainTextEdit(details)
+        self.details.setReadOnly(True)
+        self.details.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+        layout.addWidget(self.details, 1)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        copy = buttons.addButton("Copy to Clipboard", QDialogButtonBox.ButtonRole.ActionRole)
+        copy.clicked.connect(lambda: QApplication.clipboard().setText(details))
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
